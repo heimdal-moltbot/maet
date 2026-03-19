@@ -18,6 +18,7 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @maet/database generate
       - run: pnpm lint
 
   typecheck:
@@ -31,6 +32,7 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @maet/database generate
       - run: pnpm typecheck
 
   build:
@@ -44,4 +46,5 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @maet/database generate
       - run: pnpm build
