@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String     @id @default(cuid())
+  supabaseId String     @unique
+  email      String     @unique
+  name       String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  family     Family?    @relation(fields: [familyId], references: [id])
+  familyId   String?
+  mealPlans  MealPlan[]
+}
+
+model Family {
+  id            String         @id @default(cuid())
+  name          String
+  createdAt     DateTime       @default(now())
+  members       User[]
+  recipes       Recipe[]
+  mealPlans     MealPlan[]
+  shoppingLists ShoppingList[]
+}
+
+model Recipe {
+  id            String         @id @default(cuid())
+  title         String
+  description   String?
+  imageUrl      String?
+  prepTimeMin   Int?
+  cookTimeMin   Int?
+  servings      Int            @default(4)
+  ingredients   Json
+  instructions  Json
+  tags          String[]
+  familyId      String?
+  family        Family?        @relation(fields: [familyId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  mealPlanItems MealPlanItem[]
+}
+
+model MealPlan {
+  id        String         @id @default(cuid())
+  weekStart DateTime
+  familyId  String
+  family    Family         @relation(fields: [familyId], references: [id])
+  userId    String
+  user      User           @relation(fields: [userId], references: [id])
+  items     MealPlanItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model MealPlanItem {
+  id         String   @id @default(cuid())
+  mealPlanId String
+  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipeId   String
+  recipe     Recipe   @relation(fields: [recipeId], references: [id])
+  dayOfWeek  Int      // 0=Monday, 6=Sunday
+  mealType   String   // breakfast, lunch, dinner
+}
+
+model ShoppingList {
+  id        String         @id @default(cuid())
+  familyId  String
+  family    Family         @relation(fields: [familyId], references: [id])
+  weekStart DateTime
+  items     ShoppingItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model ShoppingItem {
+  id             String       @id @default(cuid())
+  shoppingListId String
+  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+  name           String
+  quantity       String?
+  unit           String?
+  category       String?
+  isChecked      Boolean      @default(false)
+}
